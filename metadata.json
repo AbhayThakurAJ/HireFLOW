@@ -1,0 +1,6 @@
+{
+  "name": "HireFlow CRM",
+  "description": "A modern SaaS CRM for small businesses and sales teams to manage leads, companies, contacts, and deals.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
