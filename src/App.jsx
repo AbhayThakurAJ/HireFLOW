@@ -11,6 +11,13 @@ import Companies from './pages/Companies';
 import CompanyDetails from './pages/CompanyDetails';
 import Contacts from './pages/Contacts';
 import ContactDetails from './pages/ContactDetails';
+import Tasks from './pages/Tasks';
+import TaskForm from './pages/TaskForm';
+import TaskDetails from './pages/TaskDetails';
+import Deals from './pages/Deals';
+import DealDetails from './pages/DealDetails';
+import DealForm from './pages/DealForm';
+import Pipeline from './pages/Pipeline';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,7 +48,15 @@ function App() {
             <Route path="/companies/:id" element={<CompanyDetails />} />
             <Route path="/contacts" element={<Contacts />} />
             <Route path="/contacts/:id" element={<ContactDetails />} />
-            <Route path="/deals" element={<div className="p-4">Deals (Phase 6)</div>} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/tasks/new" element={<TaskForm />} />
+            <Route path="/tasks/:id" element={<TaskDetails />} />
+            <Route path="/tasks/:id/edit" element={<TaskForm />} />
+            <Route path="/deals" element={<Deals />} />
+            <Route path="/deals/new" element={<DealForm />} />
+            <Route path="/deals/:id" element={<DealDetails />} />
+            <Route path="/deals/:id/edit" element={<DealForm />} />
+            <Route path="/pipeline" element={<Pipeline />} />
           </Route>
 
           {/* Catch all */}

@@ -1,3 +1,7 @@
+import ActivityTimeline from '../components/ActivityTimeline';
+import RelatedTasks from '../components/RelatedTasks';
+import RelatedNotes from '../components/RelatedNotes';
+import { useAuth } from '../hooks/useAuth';
 import { useParams, Link } from 'react-router-dom';
 import { useLead, useUpdateLead } from '../hooks/useLeads';
 import { ArrowLeft, Mail, Phone, Building, Briefcase, Calendar, Clock, Activity, Edit, UserCircle } from 'lucide-react';
@@ -6,6 +10,7 @@ import { useState } from 'react';
 
 export default function LeadDetails() {
   const { id } = useParams();
+  const { user } = useAuth();
   const { data: lead, isLoading, error } = useLead(id);
   const { mutate: updateLead, isPending: isUpdating } = useUpdateLead();
   
@@ -167,44 +172,18 @@ export default function LeadDetails() {
               </h3>
             </div>
             <div className="px-4 py-5 sm:px-6">
-              {lead.activities && lead.activities.length > 0 ? (
-                <div className="flow-root">
-                  <ul className="-mb-8">
-                    {lead.activities.map((activity, activityIdx) => (
-                      <li key={activity.id}>
-                        <div className="relative pb-8">
-                          {activityIdx !== lead.activities.length - 1 ? (
-                            <span className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true" />
-                          ) : null}
-                          <div className="relative flex space-x-3">
-                            <div>
-                              <span className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center ring-8 ring-white">
-                                {activity.type === 'STATUS_CHANGE' ? (
-                                  <Activity className="h-4 w-4 text-gray-500" />
-                                ) : (
-                                  <Clock className="h-4 w-4 text-gray-500" />
-                                )}
-                              </span>
-                            </div>
-                            <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                              <div>
-                                <p className="text-sm text-gray-500">
-                                  {activity.content} <span className="font-medium text-gray-900">by {activity.user?.firstName || 'System'}</span>
-                                </p>
-                              </div>
-                              <div className="text-right text-sm whitespace-nowrap text-gray-500">
-                                <time dateTime={activity.createdAt}>{format(new Date(activity.createdAt), 'MMM d, h:mm a')}</time>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500 text-center py-4">No activity history recorded.</p>
-              )}
+              <ActivityTimeline activities={lead.activities || []} />
+            </div>
+          </div>
+          
+          <div className="bg-white shadow sm:rounded-lg mt-6">
+            <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
+                Notes
+              </h3>
+            </div>
+            <div className="px-4 py-5 sm:px-6">
+              <RelatedNotes entityType="lead" entityId={lead.id} currentUser={user} />
             </div>
           </div>
         </div>

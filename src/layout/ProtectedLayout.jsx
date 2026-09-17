@@ -1,6 +1,6 @@
 import { Outlet, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { LayoutDashboard, Users, Building, Briefcase, LogOut, Contact } from 'lucide-react';
+import { LayoutDashboard, Users, Building, Briefcase, LogOut, Contact, Trello } from 'lucide-react';
 
 export default function ProtectedLayout() {
   const { user, isLoading, logout } = useAuth();
@@ -49,6 +49,11 @@ export default function ProtectedLayout() {
             <li>
               <Link to="/deals" className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-50">
                 <Briefcase className="mr-3 h-5 w-5 text-gray-400" /> Deals
+              </Link>
+            </li>
+            <li>
+              <Link to="/pipeline" className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-50">
+                <Trello className="mr-3 h-5 w-5 text-gray-400" /> Pipeline
               </Link>
             </li>
           </ul>

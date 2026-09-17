@@ -1,3 +1,6 @@
+import ActivityTimeline from '../components/ActivityTimeline';
+import RelatedNotes from '../components/RelatedNotes';
+import { useAuth } from '../hooks/useAuth';
 import { useParams, Link } from 'react-router-dom';
 import { useContact } from '../hooks/useContacts';
 import { ArrowLeft, Building, MapPin, Phone, Mail, Briefcase } from 'lucide-react';
@@ -5,6 +8,7 @@ import { format } from 'date-fns';
 
 export default function ContactDetails() {
   const { id } = useParams();
+  const { user } = useAuth();
   const { data: contact, isLoading, error } = useContact(id);
   
   if (isLoading) return (
@@ -105,6 +109,26 @@ export default function ContactDetails() {
             )}
           </div>
         </div>
+        
+        {/* Activity & Notes */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 lg:col-span-2">
+          <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">Activity History</h3>
+          </div>
+          <div className="px-6 py-6">
+            <ActivityTimeline activities={contact.activities} />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 lg:col-span-2">
+          <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">Notes</h3>
+          </div>
+          <div className="px-6 py-6">
+            <RelatedNotes entityType="contact" entityId={contact.id} currentUser={user} />
+          </div>
+        </div>
+
       </div>
     </div>
   );
