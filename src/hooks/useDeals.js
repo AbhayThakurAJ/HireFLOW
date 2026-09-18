@@ -1,16 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '../lib/api';
 
 const fetchDeals = async (params) => {
-  const url = new URL('/api/deals', window.location.origin);
+  const url = new URL('/deals', 'http://localhost'); // Dummy base for URL construction
   Object.keys(params).forEach(key => {
     if (params[key] !== undefined && params[key] !== '') {
       url.searchParams.append(key, params[key]);
     }
   });
   
-  const res = await fetch(url.toString());
-  if (!res.ok) throw new Error('Failed to fetch deals');
-  return res.json();
+  const queryStr = url.search;
+  return api(`/deals${queryStr}`);
 };
 
 export const useDeals = (params) => {
@@ -25,12 +25,7 @@ export const useDeal = (id) => {
     queryKey: ['deals', id],
     queryFn: async () => {
       if (!id) return null;
-      const res = await fetch(`/api/deals/${id}`);
-      if (!res.ok) {
-        if (res.status === 404) throw new Error('Deal not found');
-        throw new Error('Failed to fetch deal');
-      }
-      return res.json();
+      return api(`/deals/${id}`);
     },
     enabled: !!id,
   });
@@ -40,16 +35,7 @@ export const useCreateDeal = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data) => {
-      const res = await fetch('/api/deals', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Failed to create deal');
-      }
-      return res.json();
+      return api('/deals', { method: 'POST', body: JSON.stringify(data) });
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['deals']);
@@ -61,16 +47,7 @@ export const useUpdateDeal = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, data }) => {
-      const res = await fetch(`/api/deals/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Failed to update deal');
-      }
-      return res.json();
+      return api(`/deals/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries(['deals']);
@@ -83,16 +60,7 @@ export const useUpdateDealStage = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, stage }) => {
-      const res = await fetch(`/api/deals/${id}/stage`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stage }),
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Failed to update deal stage');
-      }
-      return res.json();
+      return api(`/deals/${id}/stage`, { method: 'PATCH', body: JSON.stringify({ stage }) });
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries(['deals']);
@@ -105,14 +73,7 @@ export const useDeleteDeal = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id) => {
-      const res = await fetch(`/api/deals/${id}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Failed to delete deal');
-      }
-      return res.json();
+      return api(`/deals/${id}`, { method: 'DELETE' });
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['deals']);

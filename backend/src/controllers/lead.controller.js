@@ -4,22 +4,23 @@ import { calculateLeadScore } from '../services/scoring.service.js';
 
 // Validation Schemas
 const leadSchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  email: z.string().email('Invalid email').optional().or(z.literal('')),
-  phone: z.string().optional().or(z.literal('')),
-  company: z.string().optional().or(z.literal('')),
-  jobTitle: z.string().optional().or(z.literal('')),
-  source: z.enum(['WEBSITE', 'LINKEDIN', 'REFERRAL', 'ADVERTISEMENT', 'COLD_CALL', 'EMAIL', 'OTHER']).optional(),
-  status: z.enum(['NEW', 'CONTACTED', 'QUALIFIED', 'CONVERTED', 'LOST']).optional(),
-  assignedTo: z.string().uuid().optional().nullable(),
-  notes: z.string().optional(),
+  firstName: z.string().trim().min(1, 'First name is required'),
+  lastName: z.string().trim().min(1, 'Last name is required'),
+  email: z.string().trim().email('Invalid email').optional().nullable().or(z.literal('')),
+  phone: z.string().trim().optional().nullable().or(z.literal('')),
+  company: z.string().trim().optional().nullable().or(z.literal('')),
+  jobTitle: z.string().trim().optional().nullable().or(z.literal('')),
+  source: z.enum(['WEBSITE', 'LINKEDIN', 'REFERRAL', 'ADVERTISEMENT', 'COLD_CALL', 'EMAIL', 'OTHER']).optional().nullable(),
+  status: z.enum(['NEW', 'CONTACTED', 'QUALIFIED', 'CONVERTED', 'LOST']).optional().nullable(),
+  assignedTo: z.string().uuid().optional().nullable().or(z.literal('')),
+  notes: z.string().optional().nullable().or(z.literal('')),
 });
 
 export const getLeads = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    let limit = parseInt(req.query.limit) || 20;
+    if (limit > 100) limit = 100;
     const search = req.query.search || '';
     const status = req.query.status;
     const assignedTo = req.query.assignedTo;
@@ -111,8 +112,25 @@ export const getLeadById = async (req, res) => {
 
 export const createLead = async (req, res) => {
   try {
-    const data = leadSchema.parse(req.body);
+    let data;
+    try {
+      data = leadSchema.parse(req.body);
+    } catch (e) {
+      console.error("Validation Error:", e.errors);
+      return res.status(400).json({ success: false, message: "Validation failed", errors: e.errors });
+    }
     
+    if (data.assignedTo === '') data.assignedTo = null;
+    if (data.email === '') data.email = null;
+    if (data.phone === '') data.phone = null;
+    if (data.company === '') data.company = null;
+    if (data.jobTitle === '') data.jobTitle = null;
+    if (data.notes === '') data.notes = null;
+
+    if (req.user.role === 'SALES_REP') {
+      data.assignedTo = req.user.id;
+    }
+
     // Auto-calculate score based on initial data
     const score = calculateLeadScore(data);
 
@@ -120,9 +138,17 @@ export const createLead = async (req, res) => {
       data: {
         ...data,
         score,
-        // If SALES_REP creates a lead, automatically assign it to them
         assignedTo: req.user.role === 'SALES_REP' ? req.user.id : data.assignedTo,
       },
+    });
+
+    await prisma.activity.create({
+      data: {
+        type: 'STATUS_CHANGE',
+        content: `Lead created with status: ${lead.status}`,
+        leadId: lead.id,
+        userId: req.user.id,
+      }
     });
 
     await prisma.auditLog.create({
@@ -144,6 +170,16 @@ export const updateLead = async (req, res) => {
     const { id } = req.params;
     const data = leadSchema.partial().parse(req.body);
 
+    if (data.assignedTo === '') data.assignedTo = null;
+    if (data.email === '') data.email = null;
+    if (data.phone === '') data.phone = null;
+    if (data.company === '') data.company = null;
+    if (data.jobTitle === '') data.jobTitle = null;
+    if (data.notes === '') data.notes = null;
+
+    if (req.user.role === 'SALES_REP' && data.assignedTo !== undefined) {
+      delete data.assignedTo;
+    }
     const existingLead = await prisma.lead.findUnique({ where: { id } });
     if (!existingLead) {
       return res.status(404).json({ success: false, message: 'Lead not found' });

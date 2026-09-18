@@ -1,5 +1,9 @@
 export const api = async (endpoint, options = {}) => {
-  const url = `${import.meta.env.VITE_API_URL}${endpoint}`;
+  let baseUrl = import.meta.env.VITE_API_URL || '/api';
+  if (baseUrl.includes('localhost')) baseUrl = '/api';
+  // Ensure it points to /api
+  if (baseUrl === '/') baseUrl = '/api';
+  const url = `${baseUrl}${endpoint}`;
   const response = await fetch(url, {
     ...options,
     headers: {

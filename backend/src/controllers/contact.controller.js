@@ -15,7 +15,8 @@ const contactSchema = z.object({
 export const getContacts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    let limit = parseInt(req.query.limit) || 20;
+    if (limit > 100) limit = 100;
     const search = req.query.search || '';
     const companyId = req.query.companyId;
 
@@ -55,11 +56,14 @@ export const getContacts = async (req, res) => {
 export const getContactById = async (req, res) => {
   try {
     const { id } = req.params;
+
+    const assignedFilter = req.user.role === 'SALES_REP' ? { assignedTo: req.user.id } : {};
     const contact = await prisma.contact.findUnique({
       where: { id },
       include: {
         company: true,
         deals: {
+          where: assignedFilter,
           orderBy: { createdAt: 'desc' },
           include: { assignee: { select: { firstName: true, lastName: true } } }
         },
@@ -73,6 +77,7 @@ export const getContactById = async (req, res) => {
         }
       }
     });
+
 
     if (!contact) return res.status(404).json({ success: false, message: 'Contact not found' });
     res.json({ success: true, data: contact });

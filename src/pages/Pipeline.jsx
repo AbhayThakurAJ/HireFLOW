@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDeals, useUpdateDealStage } from '../hooks/useDeals';
 import { Link } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 const STAGES = ['NEW', 'QUALIFIED', 'PROPOSAL', 'NEGOTIATION', 'WON', 'LOST'];
@@ -78,6 +79,10 @@ export default function Pipeline() {
             Total Pipeline Value: ${totalPipelineValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
+        <Link to="/deals/new" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Deal
+        </Link>
       </div>
 
       <div className="flex overflow-x-auto space-x-4 pb-4">
@@ -106,7 +111,7 @@ export default function Pipeline() {
                     onDragStart={(e) => handleDragStart(e, deal.id)}
                     className={`bg-white p-4 rounded-md shadow-sm border border-gray-200 cursor-grab active:cursor-grabbing hover:border-indigo-300 transition-colors ${draggedDealId === deal.id ? 'opacity-50' : ''}`}
                   >
-                    <Link to={`/deals/${deal.id}`} className="block font-medium text-gray-900 hover:text-indigo-600 truncate">
+                    <Link to={`/deals/${deal.id}`} draggable="false" className="block font-medium text-gray-900 hover:text-indigo-600 truncate pointer-events-auto">
                       {deal.title}
                     </Link>
                     {deal.company && (

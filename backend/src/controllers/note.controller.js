@@ -13,19 +13,33 @@ const noteUpdateSchema = z.object({
   content: z.string().min(1, 'Content is required'),
 });
 
+
 export const getNotes = async (req, res) => {
   try {
     const { leadId, dealId, companyId, contactId } = req.query;
-    const where = {};
     
+    if (req.user.role === 'SALES_REP') {
+      if (leadId) {
+        const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+        if (!lead || lead.assignedTo !== req.user.id) return res.status(403).json({ success: false, error: 'Unauthorized' });
+      }
+      if (dealId) {
+        const deal = await prisma.deal.findUnique({ where: { id: dealId } });
+        if (!deal || deal.assignedTo !== req.user.id) return res.status(403).json({ success: false, error: 'Unauthorized' });
+      }
+    }
+
+    const where = {};
     if (leadId) where.leadId = leadId;
     if (dealId) where.dealId = dealId;
     if (companyId) where.companyId = companyId;
     if (contactId) where.contactId = contactId;
+
     
     const notes = await prisma.note.findMany({
       where,
       orderBy: { createdAt: 'desc' },
+      take: 100,
       include: {
         author: { select: { id: true, firstName: true, lastName: true } }
       }

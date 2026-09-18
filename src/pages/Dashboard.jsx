@@ -109,7 +109,7 @@ export default function Dashboard() {
   const leadsQuery = useDashboardLeads(dateParams);
   const perfQuery = useDashboardPerformance(dateParams);
 
-  const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val || 0);
+  const formatCurrency = (val) => new Intl.NumberFormat('en-US', { notation: "compact", maximumFractionDigits: 1 }).format(val || 0);
   const formatPercent = (val) => `${(val || 0).toFixed(1)}%`;
   const formatNumber = (val) => new Intl.NumberFormat('en-US').format(val || 0);
 

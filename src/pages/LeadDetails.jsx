@@ -71,7 +71,7 @@ export default function LeadDetails() {
           <div className="sm:flex sm:space-x-5">
             <div className="flex-shrink-0">
               <div className="h-20 w-20 rounded-full bg-indigo-100 flex items-center justify-center border-4 border-white shadow-sm">
-                <span className="text-2xl font-bold text-indigo-700">{lead.firstName[0]}{lead.lastName[0]}</span>
+                <span className="text-2xl font-bold text-indigo-700">{(lead.firstName?.[0] || '') + (lead.lastName?.[0] || '')}</span>
               </div>
             </div>
             <div className="mt-4 text-center sm:mt-0 sm:pt-1 sm:text-left">

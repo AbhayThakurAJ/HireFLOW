@@ -15,7 +15,8 @@ const companySchema = z.object({
 export const getCompanies = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    let limit = parseInt(req.query.limit) || 20;
+    if (limit > 100) limit = 100;
     const search = req.query.search || '';
 
     const skip = (page - 1) * limit;
@@ -56,15 +57,20 @@ export const getCompanies = async (req, res) => {
 export const getCompanyById = async (req, res) => {
   try {
     const { id } = req.params;
+
+    const assignedFilter = req.user.role === 'SALES_REP' ? { assignedTo: req.user.id } : {};
+    
     const company = await prisma.company.findUnique({
       where: { id },
       include: {
         contacts: { orderBy: { firstName: 'asc' } },
         leads: {
+          where: assignedFilter,
           orderBy: { createdAt: 'desc' },
           include: { assignee: { select: { firstName: true, lastName: true } } }
         },
         deals: {
+          where: assignedFilter,
           orderBy: { createdAt: 'desc' },
           include: { assignee: { select: { firstName: true, lastName: true } } }
         },
@@ -78,6 +84,7 @@ export const getCompanyById = async (req, res) => {
         }
       }
     });
+
 
     if (!company) return res.status(404).json({ success: false, message: 'Company not found' });
     res.json({ success: true, data: company });

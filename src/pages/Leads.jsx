@@ -1,3 +1,5 @@
+import { Upload, Download } from 'lucide-react';
+import { useExportData, useImportLeads } from '../hooks/useImportExport';
 import { useState } from 'react';
 import { useLeads } from '../hooks/useLeads';
 import { Link } from 'react-router-dom';
@@ -10,6 +12,20 @@ export default function Leads() {
   const [status, setStatus] = useState('');
   
   const { data, isLoading, error } = useLeads({ page, limit: 10, search, status });
+
+    const { exportCsv } = useExportData();
+  const importMutation = useImportLeads();
+  const [importResult, setImportResult] = useState(null);
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      importMutation.mutate(file, {
+         onSuccess: (res) => setImportResult(res.data),
+         onError: (err) => alert(err.message)
+      });
+    }
+    e.target.value = null;
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -31,13 +47,34 @@ export default function Leads() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-gray-900">Leads</h1>
-        <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+        <Link to="/leads/new" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
           <Plus className="h-4 w-4 mr-2" />
           New Lead
-        </button>
+        </Link>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col sm:flex-row gap-4">
+      
+      {importResult && (
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-semibold text-gray-900">Import Summary</h3>
+            <button onClick={() => setImportResult(null)} className="text-gray-400 hover:text-gray-500">Close</button>
+          </div>
+          <div className="flex space-x-6 text-sm">
+            <span className="text-gray-600">Total Rows: {importResult.total}</span>
+            <span className="text-green-600">Imported: {importResult.imported}</span>
+            <span className="text-red-600">Failed: {importResult.failed}</span>
+          </div>
+          {importResult.errors.length > 0 && (
+            <div className="mt-3 max-h-40 overflow-y-auto border-t border-gray-100 pt-2 text-sm text-red-600">
+              {importResult.errors.map((e, i) => (
+                <div key={i}>Row {e.row}: {e.error}</div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+<div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col sm:flex-row gap-4">
         <form onSubmit={handleSearch} className="flex-1 flex gap-2">
           <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -105,7 +142,7 @@ export default function Leads() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0 bg-indigo-100 rounded-full flex items-center justify-center">
-                          <span className="text-indigo-700 font-medium">{lead.firstName[0]}{lead.lastName[0]}</span>
+                          <span className="text-indigo-700 font-medium">{(lead.firstName?.[0] || '') + (lead.lastName?.[0] || '')}</span>
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{lead.firstName} {lead.lastName}</div>

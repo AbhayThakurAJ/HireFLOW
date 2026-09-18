@@ -17,7 +17,8 @@ const taskUpdateSchema = taskSchema.partial();
 export const getTasks = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    let limit = parseInt(req.query.limit) || 20;
+    if (limit > 100) limit = 100;
     const search = req.query.search || '';
     const status = req.query.status || '';
     const priority = req.query.priority || '';

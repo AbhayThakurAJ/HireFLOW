@@ -1,3 +1,5 @@
+import { Download } from 'lucide-react';
+import { useExportData } from '../hooks/useImportExport';
 import { useState } from 'react';
 import { useContacts } from '../hooks/useContacts';
 import { Link } from 'react-router-dom';
@@ -9,6 +11,7 @@ export default function Contacts() {
   
   const { data, isLoading, error } = useContacts({ page, limit: 10, search });
 
+    const { exportCsv } = useExportData();
   const handleSearch = (e) => {
     e.preventDefault();
     setPage(1);

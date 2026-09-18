@@ -23,7 +23,8 @@ const dealStageUpdateSchema = z.object({
 export const getDeals = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    let limit = parseInt(req.query.limit) || 20;
+    if (limit > 100) limit = 100;
     const search = req.query.search || '';
     const stage = req.query.stage || '';
     const assignedTo = req.query.assignedTo || '';
@@ -181,6 +182,9 @@ export const updateDeal = async (req, res) => {
     if (validatedData.assignedTo === '') validatedData.assignedTo = null;
     if (validatedData.expectedCloseDate === '') validatedData.expectedCloseDate = null;
 
+    if (req.user.role === 'SALES_REP' && validatedData.assignedTo !== undefined) {
+      delete validatedData.assignedTo;
+    }
     const existingDeal = await prisma.deal.findUnique({ where: { id } });
     if (!existingDeal) {
       return res.status(404).json({ success: false, error: 'Deal not found' });

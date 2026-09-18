@@ -1,3 +1,5 @@
+import GlobalSearch from '../components/GlobalSearch';
+import NotificationBell from '../components/NotificationBell';
 import { Outlet, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { LayoutDashboard, Users, Building, Briefcase, LogOut, Contact, Trello } from 'lucide-react';
@@ -56,6 +58,13 @@ export default function ProtectedLayout() {
                 <Trello className="mr-3 h-5 w-5 text-gray-400" /> Pipeline
               </Link>
             </li>
+            {user.role === 'ADMIN' && (
+              <li>
+                <Link to="/audit-logs" className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-50">
+                  <LayoutDashboard className="mr-3 h-5 w-5 text-gray-400" /> Audit Logs
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
         <div className="p-4 border-t border-gray-200">
@@ -73,11 +82,20 @@ export default function ProtectedLayout() {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm h-16 flex items-center justify-between px-6 md:hidden">
+        <header className="bg-white shadow-sm h-16 flex items-center justify-between px-6">
+          <div className="flex-1 flex items-center">
+            <h1 className="text-xl font-bold text-indigo-600 md:hidden mr-4">HireFlow CRM</h1>
+            <div className="hidden sm:block flex-1 max-w-lg">
+              <GlobalSearch />
+            </div>
+          </div>
+          <div className="flex items-center">
+            <NotificationBell />
           <h1 className="text-xl font-bold text-indigo-600">HireFlow CRM</h1>
-          <button onClick={() => logout()} className="text-gray-500 hover:text-red-500">
-            <LogOut className="h-5 w-5" />
-          </button>
+          <button onClick={() => logout()} className="ml-4 text-gray-500 hover:text-red-500 md:hidden">
+              <LogOut className="h-5 w-5" />
+            </button>
+          </div>
         </header>
         <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
           <Outlet />

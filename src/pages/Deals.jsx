@@ -1,3 +1,5 @@
+import { Download } from 'lucide-react';
+import { useExportData } from '../hooks/useImportExport';
 import React, { useState } from 'react';
 import { useDeals, useDeleteDeal } from '../hooks/useDeals';
 import { Link } from 'react-router-dom';
@@ -15,6 +17,7 @@ export default function Deals() {
   const { data: dealsData, isLoading, isError } = useDeals({ page, limit, search, stage });
   const deleteMutation = useDeleteDeal();
 
+    const { exportCsv } = useExportData();
   const handleSearch = (e) => {
     e.preventDefault();
     setSearch(searchInput);

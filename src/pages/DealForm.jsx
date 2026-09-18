@@ -72,6 +72,9 @@ export default function DealForm() {
 
   const onSubmit = async (data) => {
     try {
+      if (data.assignedTo === "") data.assignedTo = null;
+      if (data.companyId === "") data.companyId = null;
+      if (data.contactId === "") data.contactId = null;
       if (isEdit) {
         await updateMutation.mutateAsync({ id, data });
         navigate(`/deals/${id}`);
